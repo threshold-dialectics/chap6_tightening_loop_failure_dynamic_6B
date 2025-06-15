@@ -176,84 +176,87 @@ def print_statistical_summary(stats):
         print("  - Result: No significant association detected.")
 
 def plot_results(df, stats, save_path=None):
-    """Creates the multi-panel visualization of the simulation results.
+    """Creates the multi-panel visualization of the simulation results."""
+    # Double font sizes for publication clarity
+    title_fontsize = 28
+    label_fontsize = 22
+    tick_fontsize = 18
+    legend_fontsize = 16
 
-    Parameters
-    ----------
-    df : pandas.DataFrame
-        DataFrame containing the simulation results.
-    stats : dict
-        Dictionary of statistical results.
-    save_path : str, optional
-        If provided, the figure will be saved to this path.
-    """
-    fig = plt.figure(figsize=(14, 11))
+    fig = plt.figure(figsize=(18, 14))  # Bigger figure
     gs = gridspec.GridSpec(2, 2, figure=fig)
-    fig.suptitle('Experiment 6B: Emergence of the "Tightening Loop" Dynamic', fontsize=18, y=0.96)
+    fig.suptitle('Experiment 6B: Emergence of the "Tightening Loop" Dynamic', fontsize=title_fontsize, y=0.96)
 
     # Corrected legends
     rigidity_label = "Rigidity (beta_p) Up"
     slack_label = "Energetic Slack (Fcrit_p) Down"
 
-    # Panel 1: Levers
+    # Panel 1
     ax1 = fig.add_subplot(gs[0, 0])
     ax1.plot(df['time'], df['beta_lever'], color='blue', label=rigidity_label)
     ax1.plot(df['time'], df['fcrit_lever'], color='red', label=slack_label)
-    ax1.set_title('Lever Proxies vs. Time')
-    ax1.set_xlabel('Time Step')
-    ax1.set_ylabel('Lever Value')
+    ax1.set_title('Lever Proxies vs. Time', fontsize=label_fontsize)
+    ax1.set_xlabel('Time Step', fontsize=label_fontsize)
+    ax1.set_ylabel('Lever Value', fontsize=label_fontsize)
+    ax1.tick_params(labelsize=tick_fontsize)
     ax1.grid(True, linestyle='--', alpha=0.6)
 
-    # Panel 2: Strain vs. Tolerance
+    # Panel 2
     ax2 = fig.add_subplot(gs[0, 1])
     ax2.plot(df['time'], df['strain'], color='black', label='Strain (avg_DeltaP_p)')
     ax2.plot(df['time'], df['theta_t'], color='purple', linestyle='--', label='Tolerance (ThetaT_p)')
-    ax2.fill_between(df['time'], df['strain'], df['theta_t'], where=df['theta_t'] > df['strain'], color='green', alpha=0.2, label='Safety Margin')
-    ax2.set_title('Strain vs. Tolerance')
-    ax2.set_xlabel('Time Step')
-    ax2.set_ylabel('Value')
+    ax2.fill_between(df['time'], df['strain'], df['theta_t'], where=df['theta_t'] > df['strain'],
+                     color='green', alpha=0.2, label='Safety Margin')
+    ax2.set_title('Strain vs. Tolerance', fontsize=label_fontsize)
+    ax2.set_xlabel('Time Step', fontsize=label_fontsize)
+    ax2.set_ylabel('Value', fontsize=label_fontsize)
+    ax2.tick_params(labelsize=tick_fontsize)
     ax2.grid(True, linestyle='--', alpha=0.6)
 
-    # Panel 3: Diagnostics vs. Time
+    # Panel 3
     ax3 = fig.add_subplot(gs[1, 0])
     ax3.plot(df['time'], df['speed_index'], color='orange', label='Speed Index')
     ax3.plot(df['time'], df['couple_index'], color='purple', label='Couple Index')
     ax3.axhline(0, color='gray', linestyle='--')
-    ax3.set_title('TD Diagnostics vs. Time')
-    ax3.set_xlabel('Time Step')
-    ax3.set_ylabel('Index Value')
+    ax3.set_title('TD Diagnostics vs. Time', fontsize=label_fontsize)
+    ax3.set_xlabel('Time Step', fontsize=label_fontsize)
+    ax3.set_ylabel('Index Value', fontsize=label_fontsize)
     ax3.set_ylim(-1.1, 1.1)
+    ax3.tick_params(labelsize=tick_fontsize)
     ax3.grid(True, linestyle='--', alpha=0.6)
-    ax3.legend()
+    ax3.legend(fontsize=legend_fontsize)
 
-    # Panel 4: Diagnostic Plane
+    # Panel 4
     ax4 = fig.add_subplot(gs[1, 1])
-    sc = ax4.scatter(df['speed_index'], df['couple_index'], c=df['time'], cmap='viridis', s=15, alpha=0.7)
-    ax4.set_title('Trajectory on Diagnostic Plane')
-    ax4.set_xlabel('Speed Index')
-    ax4.set_ylabel('Couple Index')
+    sc = ax4.scatter(df['speed_index'], df['couple_index'], c=df['time'], cmap='viridis', s=30, alpha=0.7)
+    ax4.set_title('Trajectory on Diagnostic Plane', fontsize=label_fontsize)
+    ax4.set_xlabel('Speed Index', fontsize=label_fontsize)
+    ax4.set_ylabel('Couple Index', fontsize=label_fontsize)
     ax4.set_xlim(left=-0.005)
     ax4.set_ylim(-1.1, 1.1)
     ax4.axhline(0, color='gray', linestyle='--')
+    ax4.tick_params(labelsize=tick_fontsize)
     ax4.grid(True, linestyle='--', alpha=0.6)
     cbar = fig.colorbar(sc, ax=ax4)
-    cbar.set_label('Time Step')
-    
-    # Add collapse line and unified legend
+    cbar.set_label('Time Step', fontsize=label_fontsize)
+    cbar.ax.tick_params(labelsize=tick_fontsize)
+
+    # Add collapse line
     collapse_time = df[df['is_collapsed']].time.iloc[0] if not df[df['is_collapsed']].empty else None
     if collapse_time:
         for ax in [ax1, ax2, ax3]:
             ax.axvline(collapse_time, color='r', linestyle=':', linewidth=2.5, label='Collapse')
-    
+
     handles1, labels1 = ax1.get_legend_handles_labels()
     handles2, labels2 = ax2.get_legend_handles_labels()
-    ax1.legend(handles1 + handles2, labels1 + labels2, loc='upper left', ncol=2, fontsize='small')
-    ax2.legend().set_visible(False) # Hide redundant legend
+    ax1.legend(handles1 + handles2, labels1 + labels2, loc='upper left', ncol=2, fontsize=legend_fontsize)
+    ax2.legend().set_visible(False)
 
     plt.tight_layout(rect=[0, 0, 1, 0.94])
     if save_path:
-        plt.savefig(save_path)
+        plt.savefig(save_path, dpi=350)  # <- DPI boost here
     plt.show()
+
 
 if __name__ == '__main__':
     # --- Simulation Setup ---
